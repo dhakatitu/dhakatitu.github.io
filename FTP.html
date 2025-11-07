@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiTYCOM Network</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --netflix-red: #E50914;
+            --netflix-dark: #141414;
+            --netflix-medium: #222222;
+            --text-light: #ffffff;
+            --text-gray: #a3a3a3;
+            --font-stack: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --focus-outline: 2px solid #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-stack);
+        }
+
+        body {
+            background-color: var(--netflix-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles - Compact */
+        header {
+            background-color: var(--netflix-dark);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 10px 0;
+            transition: background-color 0.5s;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+        }
+        
+        header.scrolled {
+            background-color: rgba(20, 20, 20, 0.98);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--netflix-red);
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+
+        nav a:hover, nav a.active, nav a:focus {
+            color: var(--text-gray);
+            outline: var(--focus-outline);
+        }
+        
+        .user-profile {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+        }
+        
+        .user-profile:focus {
+            outline: var(--focus-outline);
+        }
+
+        /* Main Content Styling - Compact */
+        .main-content {
+            padding-top: 15px;
+        }
+        
+        /* Hero Section - Compact */
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.5), var(--netflix-dark)), url('https://picsum.photos/1600/400') center/cover no-repeat;
+            height: 40vh;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+        }
+        
+        .hero-content {
+            max-width: 500px;
+        }
+
+        .hero-content h2 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--text-light);
+            text-shadow: var(--shadow);
+        }
+
+        .hero-content p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .hero-buttons button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            min-width: 100px;
+        }
+        
+        .hero-buttons button:focus {
+            outline: var(--focus-outline);
+        }
+        
+        .hero-buttons .play-btn {
+            background-color: var(--text-light);
+            color: var(--netflix-dark);
+        }
+        
+        .hero-buttons .play-btn:hover, .hero-buttons .play-btn:focus {
+            background-color: var(--text-gray);
+        }
+        
+        .hero-buttons .info-btn {
+            background-color: rgba(109, 109, 110, 0.7);
+            color: var(--text-light);
+        }
+        
+        .hero-buttons .info-btn:hover, .hero-buttons .info-btn:focus {
+            background-color: rgba(109, 109, 110, 0.9);
+        }
+
+        /* Content Rows - Compact */
+        .content-row {
+            margin-bottom: 25px;
+        }
+
+        .content-row h3 {
+            font-size: 1.2rem;
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        /* Netflix-style Horizontal Scroll Container */
+        .card-slider {
+            display: flex;
+            overflow-x: auto;
+            padding: 8px 20px;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+        
+        /* Hide scrollbar but keep functionality */
+        .card-slider::-webkit-scrollbar {
+            display: none;
+        }
+        .card-slider {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .card {
+            min-width: 180px;
+            height: 100px;
+            background-color: var(--netflix-medium);
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .card:hover, .card:focus {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+            outline: var(--focus-outline);
+        }
+
+        .card a {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            height: 100%;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .card i {
+            font-size: 1.5rem;
+            color: var(--netflix-red);
+            margin-bottom: 6px;
+        }
+        
+        .card p {
+            font-size: 0.85rem;
+            font-weight: bold;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        /* Footer - Compact */
+        footer {
+            margin-top: 30px;
+            padding: 20px 20px 30px;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            text-align: center;
+            background-color: var(--netflix-dark);
+        }
+        
+        footer p {
+            margin-bottom: 8px;
+        }
+        
+        /* Android TV specific styles */
+        @media (pointer: coarse) {
+            /* Larger touch targets for TV remote navigation */
+            .card {
+                min-width: 200px;
+                height: 110px;
+            }
+            
+            .hero-buttons button {
+                padding: 12px 24px;
+                font-size: 1rem;
+                min-width: 120px;
+            }
+            
+            nav a {
+                padding: 8px 16px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Utility Classes */
+        .hidden-mobile {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .hidden-mobile {
+                display: initial;
+            }
+        }
+        
+        /* Focus management for TV navigation */
+        .focusable:focus {
+            outline: var(--focus-outline);
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        /* Loading indicator for TV */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            color: var(--netflix-red);
+            font-size: 1.5rem;
+        }
+        
+        /* Category badges */
+        .category-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--netflix-red);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loadingIndicator">
+        <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>CiTYCOM</h1>
+                </div>
+                <nav class="hidden-mobile">
+                    <ul>
+                        <li><a href="http://11.11.11.11" class="active">HOME</a></li>
+                        <li><a href="https://www.facebook.com/CitycomNetwork/"><i class="fab fa-facebook"></i> Facebook</a></li>
+                        <li><a href="http://11.11.11.11/CiTYCOM.apk"><i class="fas fa-mobile-alt"></i> Mobile APPS</a></li>
+                        <li><a href="http://www.titu.50webs.com/Red.html"><i class="fas fa-palette"></i> ThemeRed</a></li>
+                        <li><a href="http://www.titu.50webs.com/Blue.html">ThemeBlue</a></li>
+                        <li><a href="http://www.titu.50webs.com/Green.html">ThemeGreen</a></li>
+                        <li><a href="http://www.titu.50webs.com/Mix.html">ThemeMix</a></li>
+
+                    </ul>
+                </nav>
+                <div class="user-profile">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h2>FTP Links Collection</h2>
+                    <p>Access all your favorite BDIX servers and streaming services</p>
+                    <div class="hero-buttons">
+                        <button class="play-btn"><i class="fas fa-play"></i> Browse</button>
+                        <button class="info-btn"><i class="fas fa-info-circle"></i> More Info</button>
+                    </div>
+                </div>
+            </div>
+            
+            <section class="content-row">
+                <h3>Cloud & Public Movie Links</h3>
+                <div class="card-slider">
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://citycloudbd.live">
+                            <i class="fas fa-cloud"></i>
+                            <p>CiTY CLOUD BD</p>
+                        </a>
+                        <div class="category-badge">Cloud</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://ftpbd.net">
+                            <i class="fas fa-server"></i>
+                            <p>FTP BD</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://103.58.73.8">
+                            <i class="fas fa-folder"></i>
+                            <p>FTPBD_File</p>
+                        </a>
+                        <div class="category-badge">Files</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://172.16.50.4">
+                            <i class="fas fa-server"></i>
+                            <p>SAM Online</p>
+                        </a>
+                        <div class="category-badge">Online</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://172.16.50.7">
+                            <i class="fas fa-server"></i>
+                            <p>Dhaka FLIX</p>
+                        </a>
+                        <div class="category-badge">Movies</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="content-row">
+                <h3>Discovery & ICC Network</h3>
+                <div class="card-slider">  
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://10.16.100.244">
+                            <i class="fas fa-server"></i>
+                            <p>ICC</p>
+                        </a>
+                        <div class="category-badge">Network</div>
+                    </div>             
+                    <div class="card focusable" tabindex="0">
+                        <a href="https://dflix.discoveryftp.net/m">
+                            <i class="fas fa-server"></i>
+                            <p>Dflix</p>
+                        </a>
+                        <div class="category-badge">Streaming</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="https://cds1.discoveryftp.net">
+                            <i class="fas fa-folder"></i>
+                            <p>Dflix File 1</p>
+                        </a>
+                        <div class="category-badge">Files</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="https://cds2.discoveryftp.net">
+                            <i class="fas fa-folder"></i>
+                            <p>Dflix File 2</p>
+                        </a>
+                        <div class="category-badge">Files</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="https://cds3.discoveryftp.net">
+                            <i class="fas fa-folder"></i>
+                            <p>Dflix File 3</p>
+                        </a>
+                        <div class="category-badge">Files</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-row">
+                <h3>Circle & TimePass BDIX Servers</h3>
+                <div class="card-slider">
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://circleftp.net">
+                            <i class="fas fa-server"></i>
+                            <p>Circle FTP (Primary)</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://new.circleftp.net">
+                            <i class="fas fa-server"></i>
+                            <p>Circle FTP (New)</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://ftp4.circleftp.net">
+                            <i class="fas fa-server"></i>
+                            <p>Circle FTP (4)</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://30.30.30.150">
+                            <i class="fas fa-server"></i>
+                            <p>TimePass BD Live</p>
+                        </a>
+                        <div class="category-badge">Live</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://30.30.30.130">
+                            <i class="fas fa-folder"></i>
+                            <p>TimePass BD</p>
+                        </a>
+                        <div class="category-badge">Files</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-row">
+                <h3>Popular BDIX Servers</h3>
+                <div class="card-slider">
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://fmftp.net">
+                            <i class="fas fa-server"></i>
+                            <p>FM FTP</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://10.10.10.3">
+                            <i class="fas fa-server"></i>
+                            <p>FNF</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>                
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://172.27.27.84">
+                            <i class="fas fa-server"></i>
+                            <p>WOW FTP</p>
+                        </a>
+                        <div class="category-badge">FTP</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://103.77.252.113">
+                            <i class="fas fa-server"></i>
+                            <p>ShowTime</p>
+                        </a>
+                        <div class="category-badge">Streaming</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://discoveryftp.net">
+                            <i class="fas fa-server"></i>
+                            <p>Discovery</p>
+                        </a>
+                        <div class="category-badge">Network</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="content-row">
+                <h3>Popular BDIX TV Servers</h3>
+				
+                <div class="card-slider">
+                    <div class="card focusable" tabindex="0">
+                        <a href="https://mybdix.com/">
+                            <i class="fas fa-tv"></i>
+                            <p>My BDiX</p>
+							</a>
+                        <div class="category-badge">Network</div>
+                    </div>   
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://titu.50webs.com/Bangla.html">
+                            <i class="fas fa-tv"></i>
+                            <p>Mobile TV</p>
+                        </a>
+
+			</a>
+                        <div class="category-badge">Network</div>
+                    </div>   
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://titu.50webs.com/India.html">
+                            <i class="fas fa-tv"></i>
+                            <p>Mobile TV</p>
+                        </a>
+
+
+                        </a>
+                        <div class="category-badge">Mobile TV</div>
+                    </div>   
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://192.168.91.8">
+                            <i class="fas fa-tv"></i>
+                            <p>Sports Live</p>
+                        </a>
+                        <div class="category-badge">Live TV</div>
+                    </div>
+                    <div class="card focusable" tabindex="0">
+                        <a href="http://192.19.178.178/tv/">
+                            <i class="fas fa-tv"></i>
+                            <p>TV Streaming</p>
+                        </a>
+                        <div class="category-badge">Live TV</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>CiTYCOM Network | 26 North Mugda Para</p>
+            <p>&copy; 2025 CiTYCOM. All rights reserved | Providing reliable network solutions since establishment</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Header scroll effect
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Android TV compatibility enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading indicator for external links
+            const links = document.querySelectorAll('a[href^="http"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    document.getElementById('loadingIndicator').style.display = 'block';
+                });
+            });
+            
+            // Improved focus management for TV remote navigation
+            const focusableElements = document.querySelectorAll('.focusable');
+            let currentFocusIndex = 0;
+            
+            document.addEventListener('keydown', function(e) {
+                // Handle arrow key navigation
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                }
+                
+                // Handle Enter key to simulate click
+                if (e.key === 'Enter') {
+                    const focusedElement = document.activeElement;
+                    if (focusedElement.classList.contains('focusable')) {
+                        focusedElement.click();
+                    }
+                }
+            });
+            
+            // Initialize focus on first element
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
+        });
+        
+        // Hide loading indicator when page is fully loaded
+        window.addEventListener('load', function() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
