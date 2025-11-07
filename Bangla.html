@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDIX TV</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Hls.js for HLS streaming support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.11/dist/hls.min.js"></script>
+    <!-- Load Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Bangladeshi Theme Colors */
+        :root {
+            --primary-green: #006a4e;
+            --secondary-red: #f42a41;
+            --accent-gold: #ff9933;
+            --dark-green: #00563f;
+            --light-green: #e6f4f0;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--primary-green);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a2e22;
+        }
+        
+        /* Video container with aspect ratio */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Smooth animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .channel-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .player-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        .touch-button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Focus styles for accessibility */
+        button:focus, input:focus {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        /* Card hover effects */
+        .channel-card {
+            transition: all 0.2s ease;
+        }
+        .channel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Loading animation */
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .loading-dots div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #fff;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .loading-dots div:nth-child(1) {
+            left: 8px;
+            animation: loading-dots1 0.6s infinite;
+        }
+        .loading-dots div:nth-child(2) {
+            left: 8px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(3) {
+            left: 32px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(4) {
+            left: 56px;
+            animation: loading-dots3 0.6s infinite;
+        }
+        @keyframes loading-dots1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes loading-dots3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        @keyframes loading-dots2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(24px, 0); }
+        }
+
+        /* Enhanced Gesture Controls */
+        .gesture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            pointer-events: none;
+        }
+        
+        .gesture-left, .gesture-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+        
+        .gesture-top, .gesture-bottom {
+            flex: 1;
+            pointer-events: none;
+        }
+        
+        .gesture-bottom-left, .gesture-bottom-right {
+            flex: 1;
+            pointer-events: none;
+        }
+        
+        .gesture-indicator {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .gesture-indicator.show {
+            opacity: 1;
+        }
+
+        /* Enhanced Channel Change Gesture Areas */
+        .channel-gesture-area {
+            position: absolute;
+            bottom: 20px;
+            width: 120px;
+            height: 80px;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.3;
+            transition: all 0.3s;
+            pointer-events: auto;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+        
+        .channel-gesture-area:hover {
+            opacity: 0.6;
+        }
+        
+        .channel-gesture-area.left {
+            left: 20px;
+            background: linear-gradient(135deg, rgba(0, 106, 78, 0.3), rgba(255, 153, 51, 0.3));
+            border-radius: 20px 0 0 20px;
+        }
+        
+        .channel-gesture-area.right {
+            right: 20px;
+            background: linear-gradient(225deg, rgba(0, 106, 78, 0.3), rgba(255, 153, 51, 0.3));
+            border-radius: 0 20px 20px 0;
+        }
+        
+        .channel-gesture-area .gesture-icon {
+            font-size: 24px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .channel-gesture-area .gesture-text {
+            position: absolute;
+            bottom: 8px;
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Horizontal Swipe Areas for Channel Change */
+        .swipe-left-area, .swipe-right-area {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 30%;
+            z-index: 15;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .swipe-left-area {
+            left: 0;
+        }
+        
+        .swipe-right-area {
+            right: 0;
+        }
+        
+        .swipe-left-area:hover, .swipe-right-area:hover {
+            opacity: 0.1;
+        }
+        
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .swipe-indicator.show {
+            opacity: 1;
+        }
+        
+        .swipe-indicator.left {
+            left: 20px;
+        }
+        
+        .swipe-indicator.right {
+            right: 20px;
+        }
+        
+        /* Bangladeshi Pattern Background */
+        .bd-pattern {
+            background-color: var(--primary-green);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255, 153, 51, 0.1) 0%, transparent 55%),
+                radial-gradient(circle at 75% 75%, rgba(244, 42, 65, 0.1) 0%, transparent 55%);
+        }
+        
+        /* Header with Bangladeshi flag colors */
+        .bd-header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 50%, var(--primary-green) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bd-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green) 0%, var(--secondary-red) 50%, var(--accent-gold) 100%);
+        }
+        
+        /* Channel card styling */
+        .bd-channel-card {
+            background: linear-gradient(145deg, #1a2e22, #22382d);
+            border-left: 3px solid var(--accent-gold);
+        }
+        
+        /* Active tab styling */
+        .bd-tab.active {
+            background: var(--accent-gold);
+            color: #1a2e22;
+            font-weight: bold;
+        }
+        
+        /* Button styling */
+        .bd-button {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+        }
+        
+        .bd-button:hover {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+        }
+        
+        /* Settings modal styling */
+        .bd-modal {
+            background: linear-gradient(145deg, #1a2e22, #22382d);
+            border: 1px solid var(--accent-gold);
+        }
+        
+        /* Toast notification */
+        .bd-toast {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            border-left: 4px solid var(--accent-gold);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased">
+    <!-- Main Application Container -->
+    <div id="app" class="min-h-screen">
+        <!-- Header with search -->
+        <header class="bd-header shadow-lg p-4 sticky top-0 z-40">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-white p-2 rounded-lg">
+                            <i class="fas fa-tv text-green-700 text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl md:text-2xl font-bold">BDIX TV</h1>
+                            <p class="text-green-200 text-sm">Bangladeshi TV Streaming Server</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-full md:w-64">
+                        <input type="text" id="searchInput" placeholder="Search channels..." class="w-full p-3 pl-10 bg-green-900/50 border border-green-700 rounded-xl text-white placeholder-green-300 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-green-300"></i>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <button id="favoritesBtn" class="touch-button bg-white/10 hover:bg-white/20 p-3 rounded-xl transition">
+                            <i class="fas fa-heart text-red-400"></i>
+                        </button>
+                        <button id="settingsBtn" class="touch-button bg-white/10 hover:bg-white/20 p-3 rounded-xl transition">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="max-w-6xl mx-auto p-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Video Player Section -->
+                <div class="lg:w-2/3">
+                    <div class="bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                        <!-- Video Container -->
+                        <div class="video-container rounded-t-2xl">
+                            <video id="videoPlayer" controls autoplay playsinline preload="auto" class="w-full h-full"></video>
+                            
+                            <!-- Horizontal Swipe Areas for Channel Change -->
+                            <div id="swipeLeftArea" class="swipe-left-area">
+                                <div id="swipeLeftIndicator" class="swipe-indicator left">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Previous Channel</span>
+                                </div>
+                            </div>
+                            
+                            <div id="swipeRightArea" class="swipe-right-area">
+                                <div id="swipeRightIndicator" class="swipe-indicator right">
+                                    <span>Next Channel</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Channel Change Gesture Areas -->
+                            <div id="prevChannelArea" class="channel-gesture-area left">
+                                <div class="text-center">
+                                    <i class="gesture-icon fas fa-chevron-left"></i>
+                                    <div class="gesture-text">Previous</div>
+                                </div>
+                            </div>
+                            
+                            <div id="nextChannelArea" class="channel-gesture-area right">
+                                <div class="text-center">
+                                    <i class="gesture-icon fas fa-chevron-right"></i>
+                                    <div class="gesture-text">Next</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gesture Overlay -->
+                            <div id="gestureOverlay" class="gesture-overlay">
+                                <div class="gesture-left">
+                                    <div class="gesture-top" data-action="brightness-up"></div>
+                                    <div class="gesture-bottom" data-action="brightness-down"></div>
+                                </div>
+                                <div class="gesture-right">
+                                    <div class="gesture-top" data-action="volume-up"></div>
+                                    <div class="gesture-bottom" data-action="volume-down"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Gesture Indicator -->
+                            <div id="gestureIndicator" class="gesture-indicator">
+                                <i id="gestureIcon" class="fas fa-adjust"></i>
+                                <span id="gestureText">Brightness</span>
+                                <span id="gestureValue">100%</span>
+                            </div>
+                            
+                            <!-- Loading Indicator -->
+                            <div id="loadingIndicator" class="absolute inset-0 bg-gray-900/90 flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-none opacity-0">
+                                <div class="loading-dots mb-4">
+                                    <div></div><div></div><div></div><div></div>
+                                </div>
+                                <span class="text-white font-medium">Loading Channel...</span>
+                            </div>
+                            
+                            <!-- Error Overlay -->
+                            <div id="errorOverlay" class="absolute inset-0 bg-gray-900/90 flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-none opacity-0">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                                <span class="text-red-400 font-medium text-center px-4" id="errorOverlayText">Stream Error</span>
+                                <button id="retryButton" class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
+                                    <i class="fas fa-redo mr-2"></i>Try Again
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Player Controls & Info -->
+                        <div class="p-4 bg-gray-800">
+                            <!-- Channel Info -->
+                            <div id="currentChannelInfo" class="mb-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <img id="currentChannelLogo" src="" alt="" class="w-10 h-10 rounded-lg bg-gray-700 object-contain hidden">
+                                    <div class="flex-1 min-w-0">
+                                        <h2 id="currentChannelName" class="text-xl font-bold truncate">Select a channel to start watching</h2>
+                                        <p id="currentChannelGroup" class="text-gray-400 text-sm">BDIX TV Player</p>
+                                    </div>
+                                    <button id="favoriteToggle" class="touch-button text-gray-400 hover:text-red-500 p-2">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Player Controls -->
+                            <div class="player-controls flex justify-between items-center gap-2">
+                                <button id="prevBtn" class="touch-button flex items-center justify-center p-3 flex-1 text-sm font-semibold rounded-xl bd-button hover:bg-green-800 transition duration-150 shadow-md">
+                                    <i class="fas fa-chevron-left mr-2"></i>
+                                    Previous
+                                </button>
+
+                                <div class="flex space-x-2">
+                                    <button id="fullscreenBtn" class="touch-button bg-gray-700 hover:bg-gray-600 p-3 rounded-xl transition">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button id="volumeBtn" class="touch-button bg-gray-700 hover:bg-gray-600 p-3 rounded-xl transition">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                </div>
+                                
+                                <button id="nextBtn" class="touch-button flex items-center justify-center p-3 flex-1 text-sm font-semibold rounded-xl bd-button hover:bg-green-800 transition duration-150 shadow-md">
+                                    Next
+                                    <i class="fas fa-chevron-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Access Favorites -->
+                    <div id="favoritesSection" class="mt-6 bg-gray-800 rounded-2xl p-4 hidden">
+                        <h3 class="text-lg font-bold mb-3 flex items-center">
+                            <i class="fas fa-heart text-red-400 mr-2"></i>
+                            Favorite Channels
+                        </h3>
+                        <div id="favoritesList" class="flex overflow-x-auto space-x-3 pb-2">
+                            <!-- Favorites will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Channel List Section -->
+                <div class="lg:w-1/3">
+                    <div class="bd-channel-card rounded-2xl shadow-xl p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
+                        <!-- Filter Tabs -->
+                        <div class="flex space-x-1 mb-4 bg-gray-700 p-1 rounded-xl">
+                            <button class="filter-tab bd-tab flex-1 py-2 px-3 rounded-lg text-sm font-medium transition active" data-filter="all">
+                                All Channels
+                            </button>
+                            <button class="filter-tab bd-tab flex-1 py-2 px-3 rounded-lg text-sm font-medium transition" data-filter="bangla">
+                                Bangla
+                            </button>
+                            <button class="filter-tab bd-tab flex-1 py-2 px-3 rounded-lg text-sm font-medium transition" data-filter="sports">
+                                Sports
+                            </button>
+                        </div>
+                        
+                        <!-- Group Filter -->
+                        <div class="mb-4">
+                            <select id="groupFilter" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Channel List -->
+                        <div>
+                            <h2 class="text-lg font-bold mb-3 flex items-center justify-between">
+                                <span>Available Channels</span>
+                                <span id="channelCount" class="text-sm font-normal bg-green-600 px-2 py-1 rounded-full">0</span>
+                            </h2>
+                            
+                            <div id="channelList" class="space-y-2 max-h-96 overflow-y-auto">
+                                <!-- Channels will be populated here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="bd-modal rounded-2xl p-6 max-w-md w-full mx-4 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Player Settings</h3>
+                <button id="closeSettings" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Video Quality</label>
+                    <select id="qualitySelect" class="w-full p-3 bg-gray-700 rounded-xl border border-gray-600">
+                        <option value="auto">Auto (Recommended)</option>
+                        <option value="low">Low (for slow connections)</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+                    <div>
+                        <p class="font-medium">Auto-play next channel</p>
+                        <p class="text-sm text-gray-400">Automatically play next channel when current ends</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="autoPlayNext" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+                    <div>
+                        <p class="font-medium">Show notifications</p>
+                        <p class="text-sm text-gray-400">Show stream status notifications</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="showNotifications" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+                    <div>
+                        <p class="font-medium">Enable Gesture Controls</p>
+                        <p class="text-sm text-gray-400">Touch gestures for brightness, volume, and channel change</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="enableGestures" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+                    <div>
+                        <p class="font-medium">Show Channel Gesture Areas</p>
+                        <p class="text-sm text-gray-400">Show visible channel change buttons on screen</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="showChannelGestures" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+                    <div>
+                        <p class="font-medium">Enable Horizontal Swipe for Channels</p>
+                        <p class="text-sm text-gray-400">Swipe left/right anywhere on screen to change channels</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="enableHorizontalSwipe" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="saveSettings" class="bd-button hover:bg-green-700 px-4 py-2 rounded-lg transition">
+                    Save Settings
+                </button>
+                <button id="cancelSettings" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Toast Notification -->
+    <div id="toast" class="bd-toast fixed bottom-4 right-4 text-white p-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50 max-w-sm">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-yellow-400 mr-2"></i>
+            <p id="toastMessage">Operation completed successfully</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Core Setup ---
+        let currentChannelIndex = -1;
+        let channels = [];
+        let filteredChannels = [];
+        let favorites = [];
+        let hlsInstance = null;
+        let isFullscreen = false;
+        
+        // Gesture Control Variables
+        let isGestureEnabled = true;
+        let showChannelGestures = true;
+        let enableHorizontalSwipe = true;
+        let currentBrightness = 100;
+        let gestureStartX = 0;
+        let gestureStartY = 0;
+        let gestureActive = false;
+        let gestureTimeout = null;
+        let swipeTimeout = null;
+        
+        // DOM Elements
+        const video = document.getElementById('videoPlayer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorOverlay = document.getElementById('errorOverlay');
+        const errorOverlayText = document.getElementById('errorOverlayText');
+        const channelListContainer = document.getElementById('channelList');
+        const currentChannelName = document.getElementById('currentChannelName');
+        const currentChannelGroup = document.getElementById('currentChannelGroup');
+        const currentChannelLogo = document.getElementById('currentChannelLogo');
+        const searchInput = document.getElementById('searchInput');
+        const groupFilter = document.getElementById('groupFilter');
+        const settingsModal = document.getElementById('settingsModal');
+        const favoritesSection = document.getElementById('favoritesSection');
+        const favoritesList = document.getElementById('favoritesList');
+        const channelCount = document.getElementById('channelCount');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const gestureIndicator = document.getElementById('gestureIndicator');
+        const gestureIcon = document.getElementById('gestureIcon');
+        const gestureText = document.getElementById('gestureText');
+        const gestureValue = document.getElementById('gestureValue');
+        const prevChannelArea = document.getElementById('prevChannelArea');
+        const nextChannelArea = document.getElementById('nextChannelArea');
+        const swipeLeftArea = document.getElementById('swipeLeftArea');
+        const swipeRightArea = document.getElementById('swipeRightArea');
+        const swipeLeftIndicator = document.getElementById('swipeLeftIndicator');
+        const swipeRightIndicator = document.getElementById('swipeRightIndicator');
+
+// M3U Playlist Content (same as before)
+        const m3uContent = `#EXTM3U
+
+#EXTINF:-1 tvg-logo="https://www.jagobd.com/wp-content/uploads/2015/10/ekattors-150x150.jpg?x49520" group-title="TiTU",Ekattor TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705-audio_113352_eng=113200-video=442000.m3u8
+#EXTINF:-1 tvg-logo="https://s4.gifyu.com/images/image099aceca4574557b.png" group-title="TiTU",Shomoy TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=442000.m3u8
+#EXTINF:-8 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWZ4HABUfBspJP_SKv50y-95Cje1Aba52me1mB_AlQHg&s=10" group-title="TiTU",Bangla Vison
+https://owrcovcrpy.gpcdn.net/bpk-tv/1715/output/1715-audio_113452_eng=113200-video=2202800.m3u8
+#EXTINF:-1 tvg-logo="https://www.jagobd.com/wp-content/uploads/2016/02/channel24.jpg?x49520" group-title="TiTU",Channel 24
+https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=442000.m3u8
+#EXTINF:-8 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRByVwIUKi73BQSbdJg65SYkXJSgJcKKlq9pY7i0ndYFQ&s" group-title="TiTU",Atn Bangla
+https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/1722-audio_113522_eng=113200-video=2202800.m3u8
+#EXTINF:-8 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWYsf9cfmIBG9va7VMuK-nHjSc7qFzo1ZXxd8-4cl7Qw&s=10" group-title="TiTU",Channel I
+https://owrcovcrpy.gpcdn.net/bpk-tv/1723/output/1723-audio_113532_eng=113200-video=2202800.m3u8
+#EXTINF:-1 tvg-logo="https://s4.gifyu.com/images/image099aceca4574557b.png" group-title="TiTU",Shomoy TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=442000.m3u8
+#EXTINF:-8 tvg-logo="https://i.imgur.com/PIBtCEN.jpeg" group-title="Documentary" group-title=="TiTU", Ekattor TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705-audio_113352_eng=113200-video=442000.m3u8
+#EXTINF:-8 tvg-logo="https://i.imgur.com/PIBtCEN.jpeg" group-title="Documentary" group-title="TiTU", Jalsha TV
+https://catchup.yuppcdn.net/amazonv2/36/preview/starjalsha/master/chunklist.m3u8
+#EXTINF:-8 tvg-logo="https://i.imgur.com/PIBtCEN.jpeg" group-title="Documentary" group-title="TiTU", Colors TV
+https://tvsen3.aynaott.com/u3LkNQ7UHhFX/tracks-v1a1/mono.ts.m3u8
+#EXTINF:-8 tvg-logo="https://i.imgur.com/PIBtCEN.jpeg" group-title="Documentary" group-title="TiTU", Channel 24
+https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=442000.m3u8
+
+#EXTINF:-4 tvg-logo="https://dl.dropbox.com/s/leielj83em5kg7h/somoy_news.png" group-title="TiTU",SOMOY TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/index.m3u8
+#EXTINF:-3 tvg-id="(no tvg-id)(m3u4u)" tvg-name="Ekattor TV" tvg-logo="https://s4.gifyu.com/images/imagea02f4314e761661d.png" group-title="BANGLA",Ekattor TV
+https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/index.m3u8
+#EXTINF:-5 tvg-logo="https://dl.dropbox.com/s/puf12xv5flgbnz5/channel24_bd.png" group-title="TiTU",Channel 24
+https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/index.m3u8
+#EXTINF:-3 tvg-id="(no tvg-id)(m3u4u)" tvg-name="Ekhon TV" tvg-logo="https://upload.wikimedia.org/wikipedia/en/0/0d/Ekhon_Logo.png" group-title="BANGLA",Ekon tv
+https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/globaltv.stream/playlist.m3u8
+#EXTINF:-11 tvg-logo="https://dl.dropbox.com/s/4ldi1dp09s8o6bm/atn_news_bd.png" group-title="TiTU",ATN NEWS [BD]
+https://owrcovcrpy.gpcdn.net/bpk-tv/1706/output/index.m3u8
+#EXTINF:-12 tvg-logo="https://s6.gifyu.com/images/image27cfa7002786c232.png"group-title="TiTU",ATN Bangla
+https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/index.m3u8
+#EXTINF:-29 tvg-logo="https://www.ntvbd.com/sites/default/files/aggregator/2020/02/17/ntv-channel_0.jpg" group-title="BANGLA",NTV
+#http://103.175.242.10:8080/ntv/index.m3u8
+https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/index.m3u8
+#EXTINF:-30 tvg-logo="https://s4.gifyu.com/images/image29282f9d45a183d6.png" group-title="TiTU",RTV
+https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/rtv-sg.stream/playlist.m3u8
+#EXTINF:-14 tvg-logo="https://dl.dropbox.com/s/xolazzofexo6ub8/boishakhi.png" group-title="BANGLA",BOISHAKHI TV
+https://boishakhi.sonarbanglatv.com/boishakhi/boishakhitv/index.m3u8
+#EXTINF:-8 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-0Av5Rbg5bGznka_2nXEHwSdKhdb4d5KecL4ZOD8TFw&s=10" group-title="TiTU",9xm
+https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/9xm/23886666-8fc5-470f-aab1-bd637ed607b1/3.m3u8
+#EXTINF:-8 tvg-logo="https://i.postimg.cc/L4Cpy9qt/b4umusic.png" group-title="TiTU",B4U
+https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/4598c408-0e38-488c-9b64-fc845d1ea2b6/0.m3u8
+#EXTINF:-8 tvg-logo="https://i.postimg.cc/L4Cpy9qt/b4umusic.png" group-title="TiTU",B4U Movies
+https://cdnb4u.wiseplayout.com/B4U_Movies/HD1080/HD1080.m3u8
+
+
+`;
+
+
+        // --- Initialize Application ---
+        function initApp() {
+            parseM3U();
+            setupEventListeners();
+            loadSettings();
+            loadFavorites();
+            updateUI();
+            showToast('BDIX TV Player is ready!');
+        }
+
+        // --- M3U Parser ---
+        function parseM3U() {
+            const lines = m3uContent.split('\n');
+            channels = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('#EXTINF:')) {
+                    const infoLine = lines[i];
+                    const url = lines[i + 1];
+                    
+                    // Extract channel name and group
+                    const nameMatch = infoLine.match(/,(.*?)(?:\s*\([^)]*\))?$/);
+                    const groupMatch = infoLine.match(/group-title="([^"]*)"/);
+                    const logoMatch = infoLine.match(/tvg-logo="([^"]*)"/);
+                    
+                    if (nameMatch && url) {
+                        const channel = {
+                            name: nameMatch[1].trim(),
+                            url: url.trim(),
+                            group: groupMatch ? groupMatch[1] : 'General',
+                            logo: logoMatch ? logoMatch[1] : '',
+                            isFavorite: false
+                        };
+                        channels.push(channel);
+                    }
+                }
+            }
+            
+            // Initialize filtered channels
+            filteredChannels = [...channels];
+            updateChannelList();
+            
+            // Populate group filter
+            const groups = [...new Set(channels.map(ch => ch.group))];
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = group;
+                groupFilter.appendChild(option);
+            });
+        }
+
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', filterChannels);
+            groupFilter.addEventListener('change', filterChannels);
+            
+            // Filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active', 'bg-indigo-600', 'text-white'));
+                    this.classList.add('active', 'bg-indigo-600', 'text-white');
+                    filterChannels();
+                });
+            });
+            
+            // Player controls
+            document.getElementById('prevBtn').addEventListener('click', playPreviousChannel);
+            document.getElementById('nextBtn').addEventListener('click', playNextChannel);
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+            document.getElementById('volumeBtn').addEventListener('click', toggleMute);
+            document.getElementById('favoriteToggle').addEventListener('click', toggleFavorite);
+            document.getElementById('favoritesBtn').addEventListener('click', toggleFavoritesSection);
+            document.getElementById('settingsBtn').addEventListener('click', openSettings);
+            document.getElementById('closeSettings').addEventListener('click', closeSettings);
+            document.getElementById('saveSettings').addEventListener('click', saveSettings);
+            document.getElementById('cancelSettings').addEventListener('click', closeSettings);
+            document.getElementById('retryButton').addEventListener('click', retryStream);
+            
+            // Channel gesture areas
+            prevChannelArea.addEventListener('click', playPreviousChannel);
+            nextChannelArea.addEventListener('click', playNextChannel);
+            
+            // Swipe gesture areas
+            swipeLeftArea.addEventListener('click', playPreviousChannel);
+            swipeRightArea.addEventListener('click', playNextChannel);
+            
+            // Touch events for gesture controls
+            video.addEventListener('touchstart', handleTouchStart);
+            video.addEventListener('touchmove', handleTouchMove);
+            video.addEventListener('touchend', handleTouchEnd);
+            
+            // Mouse events for desktop testing
+            video.addEventListener('mousedown', handleMouseDown);
+            video.addEventListener('mousemove', handleMouseMove);
+            video.addEventListener('mouseup', handleMouseUp);
+            video.addEventListener('mouseleave', handleMouseUp);
+            
+            // Video events
+            video.addEventListener('loadstart', showLoading);
+            video.addEventListener('canplay', hideLoading);
+            video.addEventListener('error', handleVideoError);
+            video.addEventListener('waiting', showLoading);
+            video.addEventListener('playing', hideLoading);
+            
+            // Fullscreen change
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        // --- Enhanced Gesture Controls ---
+        function handleTouchStart(e) {
+            if (!isGestureEnabled) return;
+            
+            const touch = e.touches[0];
+            gestureStartX = touch.clientX;
+            gestureStartY = touch.clientY;
+            gestureActive = true;
+            
+            // Clear any existing timeout
+            if (gestureTimeout) {
+                clearTimeout(gestureTimeout);
+                gestureTimeout = null;
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (!gestureActive || !isGestureEnabled) return;
+            
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - gestureStartX;
+            const deltaY = touch.clientY - gestureStartY;
+            
+            // Check if it's a horizontal swipe for channel change
+            if (Math.abs(deltaX) > 50 && enableHorizontalSwipe) {
+                if (deltaX > 0) {
+                    // Swipe right - previous channel
+                    showSwipeIndicator('left');
+                    if (!swipeTimeout) {
+                        swipeTimeout = setTimeout(() => {
+                            playPreviousChannel();
+                            swipeTimeout = null;
+                        }, 300);
+                    }
+                } else {
+                    // Swipe left - next channel
+                    showSwipeIndicator('right');
+                    if (!swipeTimeout) {
+                        swipeTimeout = setTimeout(() => {
+                            playNextChannel();
+                            swipeTimeout = null;
+                        }, 300);
+                    }
+                }
+                gestureActive = false;
+                return;
+            }
+            
+            // Vertical gestures for brightness and volume
+            if (Math.abs(deltaY) > 20) {
+                const videoRect = video.getBoundingClientRect();
+                const touchX = touch.clientX;
+                
+                // Left side for brightness, right side for volume
+                if (touchX < videoRect.left + videoRect.width / 2) {
+                    // Brightness control
+                    const change = -deltaY / 5; // Sensitivity adjustment
+                    adjustBrightness(change);
+                    showGestureIndicator('brightness', currentBrightness);
+                } else {
+                    // Volume control
+                    const change = -deltaY / 5; // Sensitivity adjustment
+                    adjustVolume(change);
+                    showGestureIndicator('volume', Math.round(video.volume * 100));
+                }
+                
+                gestureStartY = touch.clientY; // Reset for continuous adjustment
+            }
+            
+            e.preventDefault();
+        }
+
+        function handleTouchEnd() {
+            gestureActive = false;
+            
+            if (gestureTimeout) {
+                clearTimeout(gestureTimeout);
+                gestureTimeout = null;
+            }
+            
+            // Hide gesture indicator after a delay
+            setTimeout(() => {
+                gestureIndicator.classList.remove('show');
+            }, 1000);
+        }
+
+        // Mouse event handlers for desktop testing
+        function handleMouseDown(e) {
+            if (!isGestureEnabled) return;
+            
+            gestureStartX = e.clientX;
+            gestureStartY = e.clientY;
+            gestureActive = true;
+        }
+
+        function handleMouseMove(e) {
+            if (!gestureActive || !isGestureEnabled) return;
+            
+            const deltaX = e.clientX - gestureStartX;
+            const deltaY = e.clientY - gestureStartY;
+            
+            // Check if it's a horizontal swipe for channel change
+            if (Math.abs(deltaX) > 50 && enableHorizontalSwipe) {
+                if (deltaX > 0) {
+                    // Swipe right - previous channel
+                    showSwipeIndicator('left');
+                    if (!swipeTimeout) {
+                        swipeTimeout = setTimeout(() => {
+                            playPreviousChannel();
+                            swipeTimeout = null;
+                        }, 300);
+                    }
+                } else {
+                    // Swipe left - next channel
+                    showSwipeIndicator('right');
+                    if (!swipeTimeout) {
+                        swipeTimeout = setTimeout(() => {
+                            playNextChannel();
+                            swipeTimeout = null;
+                        }, 300);
+                    }
+                }
+                gestureActive = false;
+                return;
+            }
+            
+            // Vertical gestures for brightness and volume
+            if (Math.abs(deltaY) > 10) {
+                const videoRect = video.getBoundingClientRect();
+                const mouseX = e.clientX;
+                
+                // Left side for brightness, right side for volume
+                if (mouseX < videoRect.left + videoRect.width / 2) {
+                    // Brightness control
+                    const change = -deltaY / 5;
+                    adjustBrightness(change);
+                    showGestureIndicator('brightness', currentBrightness);
+                } else {
+                    // Volume control
+                    const change = -deltaY / 5;
+                    adjustVolume(change);
+                    showGestureIndicator('volume', Math.round(video.volume * 100));
+                }
+                
+                gestureStartY = e.clientY; // Reset for continuous adjustment
+            }
+        }
+
+        function handleMouseUp() {
+            gestureActive = false;
+            
+            if (gestureTimeout) {
+                clearTimeout(gestureTimeout);
+                gestureTimeout = null;
+            }
+            
+            // Hide gesture indicator after a delay
+            setTimeout(() => {
+                gestureIndicator.classList.remove('show');
+            }, 1000);
+        }
+
+        function showSwipeIndicator(direction) {
+            if (direction === 'left') {
+                swipeLeftIndicator.classList.add('show');
+                setTimeout(() => {
+                    swipeLeftIndicator.classList.remove('show');
+                }, 500);
+            } else {
+                swipeRightIndicator.classList.add('show');
+                setTimeout(() => {
+                    swipeRightIndicator.classList.remove('show');
+                }, 500);
+            }
+        }
+
+        function showGestureIndicator(type, value) {
+            if (type === 'brightness') {
+                gestureIcon.className = 'fas fa-sun';
+                gestureText.textContent = 'Brightness';
+            } else {
+                gestureIcon.className = 'fas fa-volume-up';
+                gestureText.textContent = 'Volume';
+            }
+            
+            gestureValue.textContent = `${value}%`;
+            gestureIndicator.classList.add('show');
+            
+            // Position the indicator
+            gestureIndicator.style.top = '50%';
+            gestureIndicator.style.left = '50%';
+            gestureIndicator.style.transform = 'translate(-50%, -50%)';
+        }
+
+        function adjustBrightness(change) {
+            currentBrightness += change;
+            currentBrightness = Math.max(0, Math.min(100, currentBrightness));
+            video.style.filter = `brightness(${currentBrightness}%)`;
+        }
+
+        function adjustVolume(change) {
+            let newVolume = video.volume + (change / 100);
+            newVolume = Math.max(0, Math.min(1, newVolume));
+            video.volume = newVolume;
+            
+            // Update volume button icon
+            const volumeBtn = document.getElementById('volumeBtn');
+            if (newVolume === 0) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else if (newVolume < 0.5) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+            } else {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        }
+
+        // --- Channel Navigation ---
+        function playChannel(index) {
+            if (index < 0 || index >= filteredChannels.length) return;
+            
+            currentChannelIndex = index;
+            const channel = filteredChannels[index];
+            
+            // Update UI
+            currentChannelName.textContent = channel.name;
+            currentChannelGroup.textContent = channel.group;
+            
+            if (channel.logo) {
+                currentChannelLogo.src = channel.logo;
+                currentChannelLogo.classList.remove('hidden');
+            } else {
+                currentChannelLogo.classList.add('hidden');
+            }
+            
+            // Update favorite button
+            const favoriteBtn = document.getElementById('favoriteToggle');
+            if (channel.isFavorite) {
+                favoriteBtn.innerHTML = '<i class="fas fa-heart text-red-500"></i>';
+            } else {
+                favoriteBtn.innerHTML = '<i class="far fa-heart"></i>';
+            }
+            
+            // Play the stream
+            playStream(channel.url);
+            
+            // Update channel list highlights
+            updateChannelList();
+            
+            // Show toast notification
+            showToast(`Now playing: ${channel.name}`);
+        }
+
+        function playPreviousChannel() {
+            if (filteredChannels.length === 0) return;
+            
+            let newIndex = currentChannelIndex - 1;
+            if (newIndex < 0) newIndex = filteredChannels.length - 1;
+            
+            playChannel(newIndex);
+        }
+
+        function playNextChannel() {
+            if (filteredChannels.length === 0) return;
+            
+            let newIndex = currentChannelIndex + 1;
+            if (newIndex >= filteredChannels.length) newIndex = 0;
+            
+            playChannel(newIndex);
+        }
+
+        // --- Stream Management ---
+        function playStream(url) {
+            showLoading();
+            
+            // Clean up previous HLS instance
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            
+            // Reset video element
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+            
+            // Check if URL is HLS
+            if (url.includes('.m3u8')) {
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls({
+                        enableWorker: false,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    });
+                    
+                    hlsInstance.loadSource(url);
+                    hlsInstance.attachMedia(video);
+                    
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play().catch(e => {
+                            console.error('Auto-play failed:', e);
+                            hideLoading();
+                        });
+                    });
+                    
+                    hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                        console.error('HLS Error:', data);
+                        if (data.fatal) {
+                            handleVideoError();
+                        }
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Native HLS support (Safari)
+                    video.src = url;
+                    video.addEventListener('loadedmetadata', function() {
+                        video.play().catch(e => {
+                            console.error('Auto-play failed:', e);
+                            hideLoading();
+                        });
+                    });
+                } else {
+                    showError('HLS is not supported in this browser');
+                }
+            } else {
+                // Assume it's a direct video stream
+                video.src = url;
+                video.play().catch(e => {
+                    console.error('Auto-play failed:', e);
+                    hideLoading();
+                });
+            }
+        }
+
+        // --- UI Updates ---
+        function updateChannelList() {
+            channelListContainer.innerHTML = '';
+            
+            if (filteredChannels.length === 0) {
+                channelListContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-tv text-3xl mb-2"></i>
+                        <p>No channels found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredChannels.forEach((channel, index) => {
+                const channelElement = document.createElement('div');
+                channelElement.className = `channel-card flex items-center space-x-3 p-3 bg-gray-700/50 hover:bg-gray-700 rounded-xl cursor-pointer transition ${index === currentChannelIndex ? 'ring-2 ring-green-500' : ''}`;
+                channelElement.addEventListener('click', () => playChannel(index));
+                
+                channelElement.innerHTML = `
+                    <div class="flex-shrink-0 w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
+                        ${channel.logo ? 
+                            `<img src="${channel.logo}" alt="${channel.name}" class="w-10 h-10 rounded object-contain">` : 
+                            `<i class="fas fa-tv text-gray-400"></i>`
+                        }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-medium truncate">${channel.name}</h3>
+                        <p class="text-sm text-gray-400 truncate">${channel.group}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        ${channel.isFavorite ? `<i class="fas fa-heart text-red-500"></i>` : ''}
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                `;
+                
+                channelListContainer.appendChild(channelElement);
+            });
+            
+            channelCount.textContent = filteredChannels.length;
+        }
+
+        function filterChannels() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGroup = groupFilter.value;
+            const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
+            
+            filteredChannels = channels.filter(channel => {
+                const matchesSearch = channel.name.toLowerCase().includes(searchTerm);
+                const matchesGroup = selectedGroup ? channel.group === selectedGroup : true;
+                
+                let matchesFilter = true;
+                if (activeFilter !== 'all') {
+                    if (activeFilter === 'bangla') {
+                        matchesFilter = channel.group.includes('Bangla');
+                    } else if (activeFilter === 'sports') {
+                        matchesFilter = channel.group === 'Sports';
+                    }
+                }
+                
+                return matchesSearch && matchesGroup && matchesFilter;
+            });
+            
+            updateChannelList();
+        }
+
+        // --- Favorites Management ---
+        function toggleFavorite() {
+            if (currentChannelIndex === -1) return;
+            
+            const channel = filteredChannels[currentChannelIndex];
+            channel.isFavorite = !channel.isFavorite;
+            
+            // Update UI
+            const favoriteBtn = document.getElementById('favoriteToggle');
+            if (channel.isFavorite) {
+                favoriteBtn.innerHTML = '<i class="fas fa-heart text-red-500"></i>';
+                addToFavorites(channel);
+                showToast('Added to favorites');
+            } else {
+                favoriteBtn.innerHTML = '<i class="far fa-heart"></i>';
+                removeFromFavorites(channel);
+                showToast('Removed from favorites');
+            }
+            
+            updateFavoritesList();
+            updateChannelList();
+        }
+
+        function addToFavorites(channel) {
+            if (!favorites.some(fav => fav.name === channel.name)) {
+                favorites.push(channel);
+                saveFavorites();
+            }
+        }
+
+        function removeFromFavorites(channel) {
+            favorites = favorites.filter(fav => fav.name !== channel.name);
+            saveFavorites();
+        }
+
+        function loadFavorites() {
+            const saved = localStorage.getItem('bdixTvFavorites');
+            if (saved) {
+                favorites = JSON.parse(saved);
+                
+                // Update channels with favorite status
+                channels.forEach(channel => {
+                    channel.isFavorite = favorites.some(fav => fav.name === channel.name);
+                });
+            }
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('bdixTvFavorites', JSON.stringify(favorites));
+        }
+
+        function updateFavoritesList() {
+            favoritesList.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = `
+                    <div class="text-center py-4 text-gray-400">
+                        <p>No favorite channels</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            favorites.forEach((channel, index) => {
+                const favoriteElement = document.createElement('div');
+                favoriteElement.className = 'flex-shrink-0 w-32 bg-gray-700 rounded-xl p-3 cursor-pointer hover:bg-gray-600 transition';
+                favoriteElement.addEventListener('click', () => {
+                    // Find and play this channel
+                    const channelIndex = filteredChannels.findIndex(ch => ch.name === channel.name);
+                    if (channelIndex !== -1) {
+                        playChannel(channelIndex);
+                    }
+                });
+                
+                favoriteElement.innerHTML = `
+                    <div class="w-10 h-10 bg-gray-600 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        ${channel.logo ? 
+                            `<img src="${channel.logo}" alt="${channel.name}" class="w-8 h-8 rounded object-contain">` : 
+                            `<i class="fas fa-tv text-gray-400"></i>`
+                        }
+                    </div>
+                    <h4 class="text-sm font-medium text-center truncate">${channel.name}</h4>
+                `;
+                
+                favoritesList.appendChild(favoriteElement);
+            });
+        }
+
+        function toggleFavoritesSection() {
+            favoritesSection.classList.toggle('hidden');
+            updateFavoritesList();
+        }
+
+        // --- Settings Management ---
+        function openSettings() {
+            settingsModal.classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            settingsModal.classList.add('hidden');
+        }
+
+        function saveSettings() {
+            // Get values from settings form
+            isGestureEnabled = document.getElementById('enableGestures').checked;
+            showChannelGestures = document.getElementById('showChannelGestures').checked;
+            enableHorizontalSwipe = document.getElementById('enableHorizontalSwipe').checked;
+            
+            // Update UI based on settings
+            if (showChannelGestures) {
+                prevChannelArea.style.display = 'flex';
+                nextChannelArea.style.display = 'flex';
+            } else {
+                prevChannelArea.style.display = 'none';
+                nextChannelArea.style.display = 'none';
+            }
+            
+            // Save to localStorage
+            const settings = {
+                isGestureEnabled,
+                showChannelGestures,
+                enableHorizontalSwipe,
+                quality: document.getElementById('qualitySelect').value,
+                autoPlayNext: document.getElementById('autoPlayNext').checked,
+                showNotifications: document.getElementById('showNotifications').checked
+            };
+            
+            localStorage.setItem('bdixTvSettings', JSON.stringify(settings));
+            
+            showToast('Settings saved successfully');
+            closeSettings();
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('bdixTvSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                
+                isGestureEnabled = settings.isGestureEnabled !== undefined ? settings.isGestureEnabled : true;
+                showChannelGestures = settings.showChannelGestures !== undefined ? settings.showChannelGestures : true;
+                enableHorizontalSwipe = settings.enableHorizontalSwipe !== undefined ? settings.enableHorizontalSwipe : true;
+                
+                // Update settings form
+                document.getElementById('enableGestures').checked = isGestureEnabled;
+                document.getElementById('showChannelGestures').checked = showChannelGestures;
+                document.getElementById('enableHorizontalSwipe').checked = enableHorizontalSwipe;
+                document.getElementById('qualitySelect').value = settings.quality || 'auto';
+                document.getElementById('autoPlayNext').checked = settings.autoPlayNext || false;
+                document.getElementById('showNotifications').checked = settings.showNotifications || true;
+                
+                // Update UI based on settings
+                if (showChannelGestures) {
+                    prevChannelArea.style.display = 'flex';
+                    nextChannelArea.style.display = 'flex';
+                } else {
+                    prevChannelArea.style.display = 'none';
+                    nextChannelArea.style.display = 'none';
+                }
+            }
+        }
+
+        // --- UI Helper Functions ---
+        function showLoading() {
+            loadingIndicator.style.opacity = '1';
+            errorOverlay.style.opacity = '0';
+        }
+
+        function hideLoading() {
+            loadingIndicator.style.opacity = '0';
+        }
+
+        function showError(message) {
+            errorOverlayText.textContent = message;
+            errorOverlay.style.opacity = '1';
+        }
+
+        function handleVideoError() {
+            showError('Failed to load stream. The channel might be offline.');
+            hideLoading();
+        }
+
+        function retryStream() {
+            if (currentChannelIndex !== -1) {
+                const channel = filteredChannels[currentChannelIndex];
+                playStream(channel.url);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        function handleFullscreenChange() {
+            isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+            
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (isFullscreen) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            
+            const volumeBtn = document.getElementById('volumeBtn');
+            if (video.muted) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else if (video.volume < 0.5) {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+            } else {
+                volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+        }
+
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        function handleKeyboard(e) {
+            // Space bar to play/pause
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+            
+            // Arrow keys for navigation
+            if (e.code === 'ArrowLeft') {
+                playPreviousChannel();
+            } else if (e.code === 'ArrowRight') {
+                playNextChannel();
+            }
+            
+            // F for fullscreen
+            if (e.code === 'KeyF') {
+                toggleFullscreen();
+            }
+            
+            // M for mute
+            if (e.code === 'KeyM') {
+                toggleMute();
+            }
+        }
+
+        function updateUI() {
+            // Initial UI state
+            if (channels.length > 0) {
+                currentChannelName.textContent = 'Select a channel to start watching';
+                currentChannelGroup.textContent = 'BDIX TV Player';
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
