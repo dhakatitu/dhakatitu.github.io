@@ -39,7 +39,6 @@
             overflow-x: hidden;
         }
 
-        /* Using Flex on container to allow section ordering on mobile */
         .container.main-body {
             display: flex;
             flex-direction: column;
@@ -87,7 +86,6 @@
             color: var(--light);
         }
 
-        /* Casio Style Clock CSS */
         .casio-clock {
             background-color: #0a1128;
             border: 2px solid #333;
@@ -101,7 +99,7 @@
 
         #casioTime {
             font-family: 'Courier New', Courier, monospace;
-            color: #00bfff; /* Deep Sky Blue */
+            color: #00bfff;
             font-weight: bold;
             font-size: 0.9rem;
             text-shadow: 0 0 5px rgba(0, 191, 255, 0.7);
@@ -159,16 +157,6 @@
             text-align: center;
         }
 
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .upper-section {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -177,14 +165,6 @@
             order: 3;
         }
 
-        .datetime-display, .weather-display, .prayer-display, .visitors-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        
         .date-time-container, .weather-container, .prayer-container, .visitors-container {
             background: var(--card-bg);
             backdrop-filter: var(--blur);
@@ -199,7 +179,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            cursor: pointer;
         }
 
         .date-time-container:hover, .weather-container:hover, .prayer-container:hover, .visitors-container:hover {
@@ -217,30 +196,14 @@
         }
 
         .current-time, .weather-temp, .visitor-count {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: white;
             text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
             letter-spacing: 1px;
         }
         
-        .visitor-count {
-            color: #48bb78;
-            animation: pulse 1.5s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 1; }
-            to { transform: scale(1.05); opacity: 0.9; }
-        }
-
-        .time-label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .visitor-count { color: #48bb78; }
 
         .weather-details {
             display: flex;
@@ -259,26 +222,9 @@
             font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.8);
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .weather-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: white;
-            margin-top: 5px;
-        }
-
-        .weather-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
-        }
-
-        .prayer-date {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 10px;
-        }
+        .weather-value { font-size: 0.9rem; font-weight: 600; color: white; }
 
         .prayer-times {
             display: grid;
@@ -294,133 +240,31 @@
             padding: 8px 5px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
         }
 
-        .prayer-time:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
+        .prayer-name { font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); text-transform: uppercase; }
 
-        .prayer-name {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
-        }
+        .prayer-value { font-size: 0.8rem; font-weight: 600; color: white; }
 
-        .prayer-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .current-prayer {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 10px;
-            align-items: center;
-            height: 100%;
-        }
+        nav ul { display: flex; list-style: none; gap: 10px; }
 
         nav a {
             text-decoration: none;
             color: var(--light);
-            font-weight: 500;
             padding: 8px 12px;
             border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            align-items: center;
-            height: 100%;
-            white-space: nowrap;
-            font-size: 0.85rem;
-            min-width: 90px;
-            justify-content: center;
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        nav a:hover, nav a:focus {
-            color: white;
-            background: rgba(255, 255, 255, 0.2);
-            outline: none;
-            box-shadow: var(--focus-glow);
-            transform: translateY(-2px);
-        }
-
-        .mobile-menu-btn {
-            display: none;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 1.3rem;
-            color: var(--light);
-            cursor: pointer;
-            height: 100%;
-            align-items: center;
-            padding: 0 8px;
-            border-radius: 6px;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr; 
-            gap: 25px;
-            margin-top: 20px;
-            order: 1;
-        }
+        .main-content { order: 1; }
 
         .sidebar {
             background: var(--card-bg);
             backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
             border: 2px solid var(--card-border);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: var(--shadow);
-            height: fit-content;
-            transition: transform 0.5s ease;
-        }
-        
-        .sidebar:hover {
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .ftp-3d {
-            font-size: 1.6rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 1px 0 rgba(0,0,0,0.3);
-            animation: glow 4s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 1px 3px rgba(0,0,0,.3); }
-            100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
         }
 
         .sidebar ul {
@@ -438,128 +282,21 @@
             color: var(--light);
             padding: 12px;
             border-radius: 12px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            font-size: 1rem;
-            min-height: 60px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .sidebar a:hover, .sidebar a:focus {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            transform: translateY(-2px);
-            outline: none;
-            box-shadow: var(--focus-glow);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .sidebar i {
-            width: 20px;
-            text-align: center;
-            color: white;
-            transition: transform 0.3s ease;
-            font-size: 1.1rem;
-        }
-
-        .sidebar a:hover i {
-            transform: scale(1.3) rotate(15deg);
-        }
-
-        .flash {
-            animation: flash-text 2s infinite alternate;
-        }
-
-        @keyframes flash-text {
-            0%, 100% { color: white; }
-            50% { color: rgba(255, 255, 255, 0.7); }
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.8);
             font-size: 0.9rem;
-            order: 4;
         }
 
-        .focus-highlight {
-            box-shadow: var(--focus-glow) !important;
-            transform: scale(1.03) !important;
-            z-index: 10;
-            position: relative;
-            background: rgba(255, 255, 255, 0.3) !important;
-            border-color: white !important;
-        }
+        .flash { animation: flash-text 2s infinite alternate; }
+        @keyframes flash-text { 0% { color: white; } 100% { color: rgba(255, 255, 255, 0.7); } }
 
-        /* --- MEDIA QUERIES --- */
-        @media (max-width: 1400px) {
-             .sidebar ul { grid-template-columns: repeat(4, 1fr); }
-        }
-        
         @media (max-width: 1200px) {
             .upper-section { grid-template-columns: repeat(2, 1fr); }
             .sidebar ul { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (max-width: 768px) {
-            .container.main-body {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .main-content {
-                order: 1;
-                margin-bottom: 20px;
-            }
-            .search-bar-container { 
-                order: 2;
-                flex-direction: column;
-            }
-            .upper-section { 
-                order: 3;
-            }
-
-            header { padding: 5px 0; }
-            nav ul {
-                display: none;
-                position: absolute;
-                top: 48px;
-                left: 0;
-                width: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                flex-direction: column;
-                padding: 12px;
-                gap: 0;
-            }
-            nav ul.show { display: flex; }
-            .mobile-menu-btn { display: flex; }
             .sidebar ul { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 600px) {
-            .upper-section { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 480px) {
-            .sidebar ul { grid-template-columns: 1fr; }
-        }
-
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .prayer-countdown {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 5px;
         }
     </style>
 </head>
@@ -571,13 +308,10 @@
                     <i class="fas fa-network-wired"></i>
                     <h1 class="flash">FTP</h1>
                     <div class="casio-clock">
-                        <div id="casioTime">00:00:00</div>
+                        <div id="casioTime">00:00:00 AM</div>
                     </div>
                 </div>
                 <nav>
-                    <button class="mobile-menu-btn">
-                        <i class="fas fa-bars"></i>
-                    </button>
                     <ul>
                         <li><a href="http://www.titu.50webs.com/"><i class="fas fa-home"></i> HOME </a></li>                      
                     </ul>
@@ -588,8 +322,8 @@
 
     <div class="container main-body">
         <div class="main-content">
-            <aside class="sidebar fade-in">
-                <h2 class="ftp-3d flash">FTP Links</h2>
+            <aside class="sidebar">
+                <h2 class="ftp-3d flash" style="margin-bottom: 20px;">FTP Links</h2>
                 <ul>
                     <li><a href="http://www.titu.50webs.com/FTP.html"><i class="fas fa-home"></i> FLiX Links</a></li>
                     <li><a href="http://citycloudbd.live"><i class="fas fa-cloud"></i> CiTY CLOUD BD</a></li>
@@ -614,125 +348,150 @@
                     <li><a href="http://discoveryftp.net"><i class="fas fa-server"></i> Discovery</a></li>
                     <li><a href="https://mybdix.com/"><i class="fas fa-server"></i> My BDiX</a></li>   
                     <li><a href="https://hdholly.com/"><i class="fas fa-tv"></i>HD Holly</a></li>
-		    <li><a href="https://hdmovie2.photography/"><i class="fas fa-tv"></i>HD Movies</a></li>
+                    <li><a href="https://hdmovie2.photography/"><i class="fas fa-tv"></i>HD Movies</a></li>
                     <li><a href="http://www.titu.50webs.com/India.html"><i class="fas fa-tv"></i>World TV</a></li>
-		    <li><a href="http://www.titu.50webs.com/Bangla.html"><i class="fas fa-tv"></i>BDiX TV</a></li>
-		    <li><a href="https://kbtvpro.totalh.net/"><i class="fas fa-tv"></i>KB TV</a></li>
-		    <li><a href="https://fanzone-omega.vercel.app/"><i class="fas fa-tv"></i>Fan Zone TV</a></li>
-		    <li><a href="http://160.187.56.254:8096/web/index.html#!/home"><i class="fas fa-tv"></i>EMBY</a></li>
+                    <li><a href="http://www.titu.50webs.com/Bangla.html"><i class="fas fa-tv"></i>BDiX TV</a></li>
+                    <li><a href="https://kbtvpro.totalh.net/"><i class="fas fa-tv"></i>KB TV</a></li>
+                    <li><a href="https://fanzone-omega.vercel.app/"><i class="fas fa-tv"></i>Fan Zone TV</a></li>
+                    <li><a href="http://160.187.56.254:8096/web/index.html#!/home"><i class="fas fa-tv"></i>EMBY</a></li>
                 </ul>
             </aside>
-            <main class="content fade-in" style="display: none;"></main>
         </div>
 
-        <div class="search-bar-container fade-in">
+        <div class="search-bar-container">
             <form class="search-form" action="https://www.google.com/search" method="get" target="_blank">
-                <h3 class="search-title"><i class="fab fa-google" style="color: #4285f4;"></i> Google Search</h3>
-                <input type="text" name="q" placeholder="Search with Google..." class="search-input focus-card" tabindex="-1" required>
+                <h3 class="search-title">Google Search</h3>
+                <input type="text" name="q" placeholder="Search..." class="search-input" required>
             </form>
             <form class="search-form" action="https://duckduckgo.com/" method="get" target="_blank">
-                <h3 class="search-title"><i class="fas fa-search" style="color: #f7a61d;"></i> DuckDuckGo Search</h3>
-                <input type="text" name="q" placeholder="Search with DuckDuckGo..." class="search-input focus-card" tabindex="-1" required>
+                <h3 class="search-title">DuckDuckGo</h3>
+                <input type="text" name="q" placeholder="Search..." class="search-input" required>
             </form>
         </div>
 
-        <div class="upper-section fade-in">
+        <div class="upper-section">
             <div class="datetime-display">
-                <div class="date-time-container focus-card" tabindex="-1">
-                    <div class="current-date" id="currentDate">Loading date...</div>
-                    <div class="current-time" id="currentTime">Loading time...</div>
+                <div class="date-time-container">
+                    <div class="current-date" id="currentDate"></div>
+                    <div class="current-time" id="currentTime">00:00:00 AM</div>
                     <div class="time-label">Bangladesh Standard Time</div>
                 </div>
             </div>
 
             <div class="weather-display">
-                <div class="weather-container focus-card" tabindex="-1">
-                    <div class="weather-icon" id="weatherIcon"><i class="fas fa-sun"></i></div>
+                <div class="weather-container">
                     <div class="weather-location">Dhaka, Bangladesh</div>
-                    <div class="weather-temp" id="weatherTemp">Loading...</div>
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
                     <div class="weather-details">
-                        <div class="weather-detail"><div class="weather-label">Feels Like</div><div class="weather-value" id="feelsLike">...</div></div>
-                        <div class="weather-detail"><div class="weather-label">Humidity</div><div class="weather-value" id="humidity">...</div></div>
+                        <div class="weather-detail"><div class="weather-label">Feels Like</div><div class="weather-value" id="feelsLike">--°C</div></div>
+                        <div class="weather-detail"><div class="weather-label">Humidity</div><div class="weather-value" id="humidity">--%</div></div>
                     </div>
                 </div>
             </div>
             
             <div class="prayer-display">
-                <div class="prayer-container focus-card" tabindex="-1">
-                    <div class="prayer-location">Prayer Times - Dhaka</div>
-                    <div class="prayer-date" id="prayerDate">Loading...</div>
-                    <div class="prayer-times" id="prayerTimes"></div>
-                    <div class="prayer-countdown" id="nextPrayerCountdown"></div>
+                <div class="prayer-container">
+                    <div class="prayer-location" id="prayerDate">Dhaka Prayers</div>
+                    <div class="prayer-times" id="prayerTimes">
+                        </div>
                 </div>
             </div>
 
             <div class="visitors-display">
-                <div class="visitors-container focus-card" tabindex="-1">
+                <div class="visitors-container">
                     <div class="visitor-label">Live Visitors</div>
                     <div class="visitor-count" id="liveVisitorsCount">0</div>
-                    <div class="time-label">Active Users</div>
                 </div>
             </div>
         </div>
 
-        <footer>
-            &copy; 2025 Media FTP Index. Quick access portal.
-        </footer>
+        <footer style="text-align: center; margin-top: 20px;">&copy; 2026 Media FTP Index.</footer>
     </div>
 
     <script>
-        // Update Time
+        // --- 12H TIME FORMATTER HELPER ---
+        function format12h(date, showSeconds = true) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let seconds = date.getSeconds();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // hour '0' should be '12'
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            seconds = seconds < 10 ? '0'+seconds : seconds;
+            return showSeconds 
+                ? `${hours}:${minutes}:${seconds} ${ampm}` 
+                : `${hours}:${minutes} ${ampm}`;
+        }
+
+        // --- CLOCK UPDATE ---
         function updateDateTime() {
             const now = new Date();
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            // Format time for main display
-            const timeStr = now.toLocaleTimeString('en-US');
-            document.getElementById('currentTime').textContent = timeStr;
-            
-            // Format time for Casio clock (HH:MM:SS)
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('casioTime').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentDate').textContent = now.toDateString();
+            document.getElementById('currentTime').textContent = format12h(now);
+            document.getElementById('casioTime').textContent = format12h(now);
         }
-        setInterval(updateDateTime, 1000); updateDateTime();
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
 
-        // Visitor Mock
-        let liveVisitors = Math.floor(Math.random() * 10) + 5;
+        // --- WEATHER SYNC (OPEN-METEO) ---
+        async function updateWeather() {
+            try {
+                // Dhaka Coords: 23.71, 90.41
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=23.7104&longitude=90.4074&current=temperature_2m,relative_humidity_2m,apparent_temperature');
+                const data = await res.json();
+                document.getElementById('weatherTemp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
+                document.getElementById('feelsLike').textContent = `${Math.round(data.current.apparent_temperature)}°C`;
+                document.getElementById('humidity').textContent = `${data.current.relative_humidity_2m}%`;
+            } catch(e) { 
+                console.log("Weather error", e);
+                document.getElementById('weatherTemp').textContent = "18°C"; 
+            }
+        }
+        updateWeather();
+
+        // --- PRAYER TIMES SYNC (ALADHAN) ---
+        async function updatePrayerTimes() {
+            try {
+                const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1');
+                const data = await res.json();
+                const t = data.data.timings;
+
+                // Helper to convert "HH:mm" string to 12H
+                const to12h = (time24) => {
+                    let [h, m] = time24.split(':');
+                    h = parseInt(h);
+                    let suffix = h >= 12 ? 'PM' : 'AM';
+                    h = h % 12 || 12;
+                    return `${h}:${m} ${suffix}`;
+                };
+
+                const prayers = [
+                    {n: "Fajr", v: to12h(t.Fajr)},
+                    {n: "Dhuhr", v: to12h(t.Dhuhr)},
+                    {n: "Asr", v: to12h(t.Asr)},
+                    {n: "Maghrib", v: to12h(t.Maghrib)},
+                    {n: "Isha", v: to12h(t.Isha)},
+                    {n: "Sunrise", v: to12h(t.Sunrise)}
+                ];
+
+                document.getElementById('prayerTimes').innerHTML = prayers.map(p => `
+                    <div class="prayer-time">
+                        <div class="prayer-name">${p.n}</div>
+                        <div class="prayer-value">${p.v}</div>
+                    </div>
+                `).join('');
+                document.getElementById('prayerDate').textContent = `Dhaka Prayers - ${new Date().toLocaleDateString()}`;
+            } catch(e) { console.log("Prayer error", e); }
+        }
+        updatePrayerTimes();
+
+        // --- VISITOR COUNTER SIMULATION ---
+        let liveVisitors = Math.floor(Math.random() * 15) + 8;
         setInterval(() => {
             liveVisitors = Math.max(1, liveVisitors + (Math.floor(Math.random() * 3) - 1));
             document.getElementById('liveVisitorsCount').textContent = liveVisitors;
         }, 5000);
-
-        // Weather (Static Fallback)
-        function updateWeather() {
-            document.getElementById('weatherTemp').textContent = `32°C / 90°F`;
-            document.getElementById('feelsLike').textContent = `38°C`;
-            document.getElementById('humidity').textContent = `65%`;
-        }
-        updateWeather();
-
-        // Prayer Times (Basic logic)
-        async function updatePrayerTimes() {
-            const prayerTimesContainer = document.getElementById('prayerTimes');
-            const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-            const times = ["04:45 AM", "12:10 PM", "03:35 PM", "06:05 PM", "07:35 PM"];
-            
-            prayerTimesContainer.innerHTML = prayers.map((p, i) => `
-                <div class="prayer-time">
-                    <div class="prayer-name">${p}</div>
-                    <div class="prayer-value">${times[i]}</div>
-                </div>
-            `).join('');
-            document.getElementById('prayerDate').textContent = new Date().toDateString();
-        }
-        updatePrayerTimes();
-
-        // Mobile Menu
-        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
-            document.querySelector('nav ul').classList.toggle('show');
-        });
     </script>
 </body>
 </html>
