@@ -3,652 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CiTYCOM Network</title>
+    <title>Media FTP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --netflix-red: #E50914;
-            --netflix-dark: #141414;
-            --netflix-medium: #222222;
-            --text-light: #ffffff;
-            --text-gray: #a3a3a3;
-            --font-stack: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            --focus-outline: 2px solid #ffffff;
+            --primary-glow: #00d2ff;
+            --secondary-glow: #3a7bd5;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-main: #e0e0e0;
+            --blur: blur(20px) saturate(180%);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: var(--font-stack);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
         body {
-            background-color: var(--netflix-dark);
-            color: var(--text-light);
-            line-height: 1.6;
+            background: #050505;
+            color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        .container {
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 0 20px;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
         }
 
-        /* Header Styles - Compact */
+        .container { width: 95%; max-width: 1400px; margin: 0 auto; padding: 20px; }
+
         header {
-            background-color: var(--netflix-dark);
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
             position: sticky;
             top: 0;
-            z-index: 100;
-            padding: 10px 0;
-            transition: background-color 0.5s;
+            z-index: 1000;
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 40px;
-        }
-        
-        header.scrolled {
-            background-color: rgba(20, 20, 20, 0.98);
-        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
 
-        .logo {
+        .logo-box {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            color: var(--netflix-red);
-            font-weight: 900;
-            letter-spacing: -1px;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
             gap: 15px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        nav a {
-            text-decoration: none;
-            color: var(--text-light);
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-            padding: 6px 12px;
-            border-radius: 4px;
-        }
-
-        nav a:hover, nav a.active, nav a:focus {
-            color: var(--text-gray);
-            outline: var(--focus-outline);
-        }
-        
-        .user-profile {
-            font-size: 1.2rem;
-            color: var(--text-light);
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 50%;
-        }
-        
-        .user-profile:focus {
-            outline: var(--focus-outline);
-        }
-
-        /* Main Content Styling - Compact */
-        .main-content {
-            padding-top: 15px;
-        }
-        
-        /* Hero Section - Compact */
-        .hero-section {
-            background: linear-gradient(rgba(0,0,0,0.5), var(--netflix-dark)), url('https://picsum.photos/1600/400') center/cover no-repeat;
-            height: 40vh;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            margin-bottom: 25px;
-            border-radius: 6px;
-        }
-        
-        .hero-content {
-            max-width: 500px;
-        }
-
-        .hero-content h2 {
-            font-size: 2.2rem;
-            font-weight: 900;
-            margin-bottom: 15px;
-            color: var(--text-light);
-            text-shadow: var(--shadow);
-        }
-
-        .hero-content p {
-            font-size: 1rem;
-            margin-bottom: 20px;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .hero-buttons button {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s;
-            min-width: 100px;
-        }
-        
-        .hero-buttons button:focus {
-            outline: var(--focus-outline);
-        }
-        
-        .hero-buttons .play-btn {
-            background-color: var(--text-light);
-            color: var(--netflix-dark);
-        }
-        
-        .hero-buttons .play-btn:hover, .hero-buttons .play-btn:focus {
-            background-color: var(--text-gray);
-        }
-        
-        .hero-buttons .info-btn {
-            background-color: rgba(109, 109, 110, 0.7);
-            color: var(--text-light);
-        }
-        
-        .hero-buttons .info-btn:hover, .hero-buttons .info-btn:focus {
-            background-color: rgba(109, 109, 110, 0.9);
-        }
-
-        /* Content Rows - Compact */
-        .content-row {
-            margin-bottom: 25px;
-        }
-
-        .content-row h3 {
-            font-size: 1.2rem;
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-        
-        /* Netflix-style Horizontal Scroll Container */
-        .card-slider {
-            display: flex;
-            overflow-x: auto;
+        .casio-clock {
+            background: #000;
+            border: 1px solid var(--primary-glow);
             padding: 8px 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            color: var(--primary-glow);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            transition: 0.3s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card:hover {
+            border-color: var(--primary-glow);
+            transform: translateY(-3px);
+        }
+
+        .ftp-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 12px;
-            scroll-behavior: smooth;
-        }
-        
-        /* Hide scrollbar but keep functionality */
-        .card-slider::-webkit-scrollbar {
-            display: none;
-        }
-        .card-slider {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
         }
 
-        .card {
-            min-width: 180px;
-            height: 100px;
-            background-color: var(--netflix-medium);
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .card:hover, .card:focus {
-            transform: scale(1.05);
-            z-index: 10;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
-            outline: var(--focus-outline);
-        }
-
-        .card a {
+        .ftp-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            text-decoration: none;
-            color: var(--text-light);
-            height: 100%;
-            padding: 12px;
-            text-align: center;
-        }
-        
-        .card i {
-            font-size: 1.5rem;
-            color: var(--netflix-red);
-            margin-bottom: 6px;
-        }
-        
-        .card p {
-            font-size: 0.85rem;
-            font-weight: bold;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            gap: 8px;
+            transition: 0.2s;
         }
 
-        /* Footer - Compact */
-        footer {
-            margin-top: 30px;
-            padding: 20px 20px 30px;
-            color: var(--text-gray);
-            font-size: 0.8rem;
-            text-align: center;
-            background-color: var(--netflix-dark);
-        }
-        
-        footer p {
-            margin-bottom: 8px;
-        }
-        
-        /* Android TV specific styles */
-        @media (pointer: coarse) {
-            /* Larger touch targets for TV remote navigation */
-            .card {
-                min-width: 200px;
-                height: 110px;
-            }
-            
-            .hero-buttons button {
-                padding: 12px 24px;
-                font-size: 1rem;
-                min-width: 120px;
-            }
-            
-            nav a {
-                padding: 8px 16px;
-                font-size: 1rem;
-            }
-        }
-        
-        /* Utility Classes */
-        .hidden-mobile {
-            display: none;
-        }
-        
-        @media (min-width: 768px) {
-            .hidden-mobile {
-                display: initial;
-            }
-        }
-        
-        /* Focus management for TV navigation */
-        .focusable:focus {
-            outline: var(--focus-outline);
+        .ftp-links a:hover {
+            background: rgba(0, 210, 255, 0.1);
+            color: var(--primary-glow);
             transform: scale(1.05);
-            z-index: 10;
         }
-        
-        /* Loading indicator for TV */
-        .loading {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            color: var(--netflix-red);
-            font-size: 1.5rem;
-        }
-        
-        /* Category badges */
-        .category-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--netflix-red);
+
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+        .search-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
             color: white;
-            font-size: 0.6rem;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .prayer-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="loading" id="loadingIndicator">
-        <i class="fas fa-spinner fa-spin"></i>
-    </div>
-    
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <h1>CiTYCOM</h1>
-                </div>
-                <nav class="hidden-mobile">
-                    <ul>
-                        <li><a href="http://11.11.11.11" class="active">HOME</a></li>
-                        <li><a href="https://www.facebook.com/CitycomNetwork/"><i class="fab fa-facebook"></i> Facebook</a></li>
-                        <li><a href="http://11.11.11.11/CiTYCOM.apk"><i class="fas fa-mobile-alt"></i> Mobile APPS</a></li>
-                        <li><a href="http://www.titu.50webs.com/Red.html"><i class="fas fa-palette"></i> ThemeRed</a></li>
-                        <li><a href="http://www.titu.50webs.com/Blue.html">ThemeBlue</a></li>
-                        <li><a href="http://www.titu.50webs.com/Green.html">ThemeGreen</a></li>
-                        <li><a href="http://www.titu.50webs.com/Mix.html">ThemeMix</a></li>
 
-                    </ul>
-                </nav>
-                <div class="user-profile">
-                    <i class="fas fa-user-circle"></i>
+<canvas id="bg-canvas"></canvas>
+
+<header>
+    <div class="container header-content">
+        <div class="logo-box">
+            <i class="fas fa-satellite-dish"></i>
+            <span>MEDIA FTP HUB</span>
+        </div>
+        <div class="casio-clock" id="mainClock">--:--:-- AM</div>
+    </div>
+</header>
+
+<div class="container dashboard-grid">
+    <main class="glass-card">
+        <h2 style="margin-bottom: 30px;"><i class="fas fa-folder-open"></i> HIGH-SPEED FTP SERVERS </h2>
+        <div class="ftp-links">
+             	    <li><a href="http://www.titu.50webs.com/FTP.html"><i class="fas fa-home"></i> FLiX Links</a></li>
+                    <li><a href="http://citycloudbd.live"><i class="fas fa-cloud"></i> CiTY CLOUD BD</a></li>
+                    <li><a href="http://10.16.100.244"><i class="fas fa-server"></i> ICC</a></li>   
+                    <li><a href="http://172.16.50.4"><i class="fas fa-server"></i> SAM Online</a></li>
+                    <li><a href="http://172.16.50.7"><i class="fas fa-server"></i> Dhaka FLIX</a></li>
+                    <li><a href="http://fmftp.net"><i class="fas fa-server"></i> FM FTP</a></li>
+                    <li><a href="http://30.30.30.150"><i class="fas fa-server"></i> TimePass BD Live</a></li>
+                    <li><a href="http://30.30.30.130"><i class="fas fa-folder"></i> TimePass BD</a></li>
+                    <li><a href="http://ftpbd.net"><i class="fas fa-server"></i> FTP BD</a></li>
+                    <li><a href="http://103.58.73.8"><i class="fas fa-folder"></i> FTPBD_File</a></li>
+                    <li><a href="http://circleftp.net"><i class="fas fa-server"></i> Circle FTP(Primary)</a></li>
+                    <li><a href="http://new.circleftp.net"><i class="fas fa-server"></i> Circle FTP (New)</a></li>
+                    <li><a href="http://ftp4.circleftp.net"><i class="fas fa-server"></i> Circle FTP (4)</a></li>                              
+                    <li><a href="https://dflix.discoveryftp.net/m"><i class="fas fa-server"></i> Dflix</a></li>
+                    <li><a href="https://cds1.discoveryftp.net"><i class="fas fa-folder"></i> Dflix File 1</a></li>
+                    <li><a href="https://cds2.discoveryftp.net"><i class="fas fa-folder"></i> Dflix File 2</a></li>
+                    <li><a href="https://cds3.discoveryftp.net"><i class="fas fa-folder"></i> Dflix File 3</a></li>                 
+                    <li><a href="http://10.10.10.3"><i class="fas fa-server"></i> FNF</a></li>                
+                    <li><a href="http://172.27.27.84"><i class="fas fa-server"></i> WOW FTP</a></li>
+                    <li><a href="http://103.77.252.113"><i class="fas fa-server"></i> ShowTime</a></li>
+                    <li><a href="http://discoveryftp.net"><i class="fas fa-server"></i> Discovery</a></li>
+                    <li><a href="https://mybdix.com/"><i class="fas fa-server"></i> My BDiX</a></li>   
+                    <li><a href="https://hdholly.com/"><i class="fas fa-tv"></i>HD Holly</a></li>
+                    <li><a href="https://hdmovie2.photography/"><i class="fas fa-tv"></i>HD Movies</a></li>
+                    <li><a href="http://www.titu.50webs.com/India.html"><i class="fas fa-tv"></i>World TV</a></li>
+                    <li><a href="http://www.titu.50webs.com/Bangla.html"><i class="fas fa-tv"></i>BDiX TV</a></li>
+                    <li><a href="https://kbtvpro.totalh.net/"><i class="fas fa-tv"></i>KB TV</a></li>
+                    <li><a href="https://fanzone-omega.vercel.app/"><i class="fas fa-tv"></i>Fan Zone TV</a></li>
+                    <li><a href="http://160.187.56.254:8096/web/index.html#!/home"><i class="fas fa-tv"></i>EMBY</a></li>
+
+        </div>
+    </main>
+
+    <aside class="sidebar">
+        <div class="glass-card">
+            <h3><i class="fas fa-search"></i> SEARCH</h3>
+            <form action="https://www.google.com/search" method="get" target="_blank">
+                <input type="text" name="q" placeholder="Google Search..." class="search-input">
+            </form>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fas fa-clock"></i> PRAYERS TiME</h3>
+            <div id="prayerTimes" style="margin-top: 10px;">
                 </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fas fa-temperature-high"></i> WEATHER</h3>
+            <div id="weather-info" style="text-align: center; margin-top: 10px;">
+                <div style="font-size: 2.2rem; font-weight: 700;" id="temp">--°C</div>
+                <div id="humidity" style="color: var(--primary-glow);">Humidity: --%</div>
             </div>
         </div>
-    </header>
+    </aside>
+</div>
 
-    <div class="container">
-        <div class="main-content">
-            <div class="hero-section">
-                <div class="hero-content">
-                    <h2>FTP Links Collection</h2>
-                    <p>Access all your favorite BDIX servers and streaming services</p>
-                    <div class="hero-buttons">
-                        <button class="play-btn"><i class="fas fa-play"></i> Browse</button>
-                        <button class="info-btn"><i class="fas fa-info-circle"></i> More Info</button>
-                    </div>
-                </div>
-            </div>
+<script>
+    // --- HELPER: GLOBAL 12H FORMATTER ---
+    function formatTo12H(timeStr) {
+        // Handles "HH:mm" strings from APIs
+        if (!timeStr) return "--:-- --";
+        let [hours, minutes] = timeStr.split(':');
+        hours = parseInt(hours);
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // --- REAL-TIME CLOCK ---
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('mainClock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- PRAYER TIMES (DHAKA) IN 12H ---
+    async function getPrayers() {
+        try {
+            const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1');
+            const { data } = await res.json();
+            const keys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
             
-            <section class="content-row">
-                <h3>Cloud & Public Movie Links</h3>
-                <div class="card-slider">
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://citycloudbd.live">
-                            <i class="fas fa-cloud"></i>
-                            <p>CiTY CLOUD BD</p>
-                        </a>
-                        <div class="category-badge">Cloud</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://ftpbd.net">
-                            <i class="fas fa-server"></i>
-                            <p>FTP BD</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://103.58.73.8">
-                            <i class="fas fa-folder"></i>
-                            <p>FTPBD_File</p>
-                        </a>
-                        <div class="category-badge">Files</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://172.16.50.4">
-                            <i class="fas fa-server"></i>
-                            <p>SAM Online</p>
-                        </a>
-                        <div class="category-badge">Online</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://172.16.50.7">
-                            <i class="fas fa-server"></i>
-                            <p>Dhaka FLIX</p>
-                        </a>
-                        <div class="category-badge">Movies</div>
-                    </div>
+            document.getElementById('prayerTimes').innerHTML = keys.map(k => `
+                <div class="prayer-item">
+                    <span>${k}</span>
+                    <span style="font-weight:bold; color:var(--primary-glow)">${formatTo12H(data.timings[k])}</span>
                 </div>
-            </section>
+            `).join('');
+        } catch(e) { console.error("Prayer load fail"); }
+    }
+    getPrayers();
+
+    // --- WEATHER (DHAKA) ---
+    async function getWeather() {
+        try {
+            const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=23.71&longitude=90.41&current=temperature_2m,relative_humidity_2m');
+            const data = await res.json();
+            document.getElementById('temp').textContent = `${Math.round(data.current.temperature_2m)}°C`;
+            document.getElementById('humidity').textContent = `Humidity: ${data.current.relative_humidity_2m}%`;
+        } catch(e) { console.error("Weather load fail"); }
+    }
+    getWeather();
+
+    // --- DYNAMIC BACKGROUND PARTICLES ---
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let dots = [];
+
+    function init() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', init);
+    init();
+
+    class Dot {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vX = (Math.random() - 0.5) * 0.4;
+            this.vY = (Math.random() - 0.5) * 0.4;
+        }
+        draw() {
+            this.x += this.vX;
+            this.y += this.vY;
+            if(this.x < 0 || this.x > canvas.width) this.vX *= -1;
+            if(this.y < 0 || this.y > canvas.height) this.vY *= -1;
             
-            <section class="content-row">
-                <h3>Discovery & ICC Network</h3>
-                <div class="card-slider">  
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://10.16.100.244">
-                            <i class="fas fa-server"></i>
-                            <p>ICC</p>
-                        </a>
-                        <div class="category-badge">Network</div>
-                    </div>             
-                    <div class="card focusable" tabindex="0">
-                        <a href="https://dflix.discoveryftp.net/m">
-                            <i class="fas fa-server"></i>
-                            <p>Dflix</p>
-                        </a>
-                        <div class="category-badge">Streaming</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="https://cds1.discoveryftp.net">
-                            <i class="fas fa-folder"></i>
-                            <p>Dflix File 1</p>
-                        </a>
-                        <div class="category-badge">Files</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="https://cds2.discoveryftp.net">
-                            <i class="fas fa-folder"></i>
-                            <p>Dflix File 2</p>
-                        </a>
-                        <div class="category-badge">Files</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="https://cds3.discoveryftp.net">
-                            <i class="fas fa-folder"></i>
-                            <p>Dflix File 3</p>
-                        </a>
-                        <div class="category-badge">Files</div>
-                    </div>
-                </div>
-            </section>
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 210, 255, 0.4)';
+            ctx.fill();
+        }
+    }
 
-            <section class="content-row">
-                <h3>Circle & TimePass BDIX Servers</h3>
-                <div class="card-slider">
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://circleftp.net">
-                            <i class="fas fa-server"></i>
-                            <p>Circle FTP (Primary)</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://new.circleftp.net">
-                            <i class="fas fa-server"></i>
-                            <p>Circle FTP (New)</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://ftp4.circleftp.net">
-                            <i class="fas fa-server"></i>
-                            <p>Circle FTP (4)</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://30.30.30.150">
-                            <i class="fas fa-server"></i>
-                            <p>TimePass BD Live</p>
-                        </a>
-                        <div class="category-badge">Live</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://30.30.30.130">
-                            <i class="fas fa-folder"></i>
-                            <p>TimePass BD</p>
-                        </a>
-                        <div class="category-badge">Files</div>
-                    </div>
-                </div>
-            </section>
+    for(let i=0; i<60; i++) dots.push(new Dot());
 
-            <section class="content-row">
-                <h3>Popular BDIX Servers</h3>
-                <div class="card-slider">
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://fmftp.net">
-                            <i class="fas fa-server"></i>
-                            <p>FM FTP</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://10.10.10.3">
-                            <i class="fas fa-server"></i>
-                            <p>FNF</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>                
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://172.27.27.84">
-                            <i class="fas fa-server"></i>
-                            <p>WOW FTP</p>
-                        </a>
-                        <div class="category-badge">FTP</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://103.77.252.113">
-                            <i class="fas fa-server"></i>
-                            <p>ShowTime</p>
-                        </a>
-                        <div class="category-badge">Streaming</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://discoveryftp.net">
-                            <i class="fas fa-server"></i>
-                            <p>Discovery</p>
-                        </a>
-                        <div class="category-badge">Network</div>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="content-row">
-                <h3>Popular BDIX TV Servers</h3>
-				
-                <div class="card-slider">
-                    <div class="card focusable" tabindex="0">
-                        <a href="https://mybdix.com/">
-                            <i class="fas fa-tv"></i>
-                            <p>My BDiX</p>
-							</a>
-                        <div class="category-badge">Network</div>
-                    </div>   
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://titu.50webs.com/Bangla.html">
-                            <i class="fas fa-tv"></i>
-                            <p>Mobile TV</p>
-                        </a>
-
-			</a>
-                        <div class="category-badge">Network</div>
-                    </div>   
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://titu.50webs.com/India.html">
-                            <i class="fas fa-tv"></i>
-                            <p>Mobile TV</p>
-                        </a>
-
-
-                        </a>
-                        <div class="category-badge">Mobile TV</div>
-                    </div>   
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://192.168.91.8">
-                            <i class="fas fa-tv"></i>
-                            <p>Sports Live</p>
-                        </a>
-                        <div class="category-badge">Live TV</div>
-                    </div>
-                    <div class="card focusable" tabindex="0">
-                        <a href="http://192.19.178.178/tv/">
-                            <i class="fas fa-tv"></i>
-                            <p>TV Streaming</p>
-                        </a>
-                        <div class="category-badge">Live TV</div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <footer>
-        <div class="container">
-            <p>CiTYCOM Network | 26 North Mugda Para</p>
-            <p>&copy; 2025 CiTYCOM. All rights reserved | Providing reliable network solutions since establishment</p>
-        </div>
-    </footer>
-    
-    <script>
-        // Header scroll effect
-        const header = document.querySelector('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Android TV compatibility enhancements
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add loading indicator for external links
-            const links = document.querySelectorAll('a[href^="http"]');
-            links.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    document.getElementById('loadingIndicator').style.display = 'block';
-                });
-            });
-            
-            // Improved focus management for TV remote navigation
-            const focusableElements = document.querySelectorAll('.focusable');
-            let currentFocusIndex = 0;
-            
-            document.addEventListener('keydown', function(e) {
-                // Handle arrow key navigation
-                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
-                    focusableElements[currentFocusIndex].focus();
-                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
-                    focusableElements[currentFocusIndex].focus();
-                }
-                
-                // Handle Enter key to simulate click
-                if (e.key === 'Enter') {
-                    const focusedElement = document.activeElement;
-                    if (focusedElement.classList.contains('focusable')) {
-                        focusedElement.click();
-                    }
+    function loop() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        dots.forEach(d => {
+            d.draw();
+            dots.forEach(d2 => {
+                let dist = Math.hypot(d.x - d2.x, d.y - d2.y);
+                if(dist < 120) {
+                    ctx.strokeStyle = `rgba(0, 210, 255, ${1 - dist/120})`;
+                    ctx.lineWidth = 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(d.x, d.y);
+                    ctx.lineTo(d2.x, d2.y);
+                    ctx.stroke();
                 }
             });
-            
-            // Initialize focus on first element
-            if (focusableElements.length > 0) {
-                focusableElements[0].focus();
-            }
         });
-        
-        // Hide loading indicator when page is fully loaded
-        window.addEventListener('load', function() {
-            document.getElementById('loadingIndicator').style.display = 'none';
-        });
-    </script>
+        requestAnimationFrame(loop);
+    }
+    loop();
+</script>
 </body>
 </html>
